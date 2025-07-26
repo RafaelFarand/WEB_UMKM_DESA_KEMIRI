@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Peta Tematik UMKM - Desa Kemiri</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.awesome-markers/2.0.5/leaflet.awesome-markers.css">
+  <style>
+    :root {
+      --primary-orange: #e65100;
+      --secondary-orange: #ff6f00;
+      --accent-orange: #ff9800;
+      --light-orange: #fff3e0;
+      --gold: #ffc107;
+      --primary-brown: #5d4037;
+      --secondary-brown: #8d6e63;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      background: var(--light-orange);
+    }
+
+    .page-header {
+      background: linear-gradient(rgba(230, 81, 0, 0.7), rgba(255, 111, 0, 0.7)),
+        url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800"><rect fill="%23ff6f00" width="1200" height="800"/><path fill="%23e65100" d="M0,400 C300,200 600,600 900,300 C1050,150 1200,450 1200,400 L1200,800 L0,800 Z"/></svg>');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      min-height: 500px;
+      display: flex;
+      align-items: center;
+      color: white;
+      padding: 3rem 1rem;
+      text-align: center;
+      position: relative;
+    }
+
+    .page-title {
+      font-size: 2.5rem;
+      font-weight: bold;
+      margin-bottom: 1rem;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .page-subtitle {
+      font-size: 1.1rem;
+      opacity: 0.9;
+    }
+
+    .main-content {
+      padding: 4rem 0;
+      background: white;
+    }
+
+    .section-title {
+      color: var(--primary-orange);
+      font-weight: bold;
+      margin-bottom: 3rem;
+      position: relative;
+      padding-bottom: 10px;
+      text-align: center;
+    }
+
+    .section-title::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 50px;
+      height: 3px;
+      background: var(--gold);
+      border-radius: 2px;
+    }
+
+    .peta-section {
+      background: #f8f9fa;
+      padding: 2rem;
+      border-radius: 15px;
+      margin-bottom: 3rem;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .peta-container {
+      background: white;
+      border-radius: 15px;
+      padding: 2rem;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      margin-bottom: 2rem;
+    }
+
+    .peta-image {
+      width: 100%;
+      height: auto;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .footer {
+      background: linear-gradient(135deg, var(--primary-orange), var(--secondary-orange));
+      color: white;
+      padding: 2rem 1rem;
+      text-align: center;
+    }
+
+    .footer-content {
+      border-top: 2px solid var(--gold);
+      padding-top: 1rem;
+      margin-top: 1rem;
+    }
+
+    .btn-custom {
+      background: var(--accent-orange);
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 25px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+
+    .btn-custom:hover {
+      background: var(--secondary-orange);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .leaflet-control-custom {
+      background: #fff3e0;
+      border: 1px solid #ffc107;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+      cursor: pointer;
+      padding: 8px 14px;
+      font-size: 15px;
+      color: #e65100;
+      margin: 8px;
+      transition: background 0.2s;
+    }
+
+    .leaflet-control-custom:hover {
+      background: #ffc107;
+      color: #fff;
+    }
+
+    /* Mobile Optimizations */
+    @media (max-width: 768px) {
+      .page-title {
+        font-size: 2rem;
+      }
+
+      .page-subtitle {
+        font-size: 1rem;
+      }
+
+      .main-content {
+        padding: 3rem 0;
+      }
+
+      .peta-container {
+        padding: 1rem;
+      }
+    }
+
+    /* Animations */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .fade-in-up {
+      animation: fadeInUp 0.6s ease-out;
+    }
+
+    .stagger-animation {
+      animation-delay: 0.1s;
+    }
+
+    .stagger-animation:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    .stagger-animation:nth-child(3) {
+      animation-delay: 0.3s;
+    }
+
+    .stagger-animation:nth-child(4) {
+      animation-delay: 0.4s;
+    }
+
+    .stagger-animation:nth-child(5) {
+      animation-delay: 0.5s;
+    }
+
+    .stagger-animation:nth-child(6) {
+      animation-delay: 0.6s;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Page Header -->
+  <section class="page-header">
+    <div class="container">
+      <h1 class="page-title">Peta Tematik UMKM</h1>
+      <p class="page-subtitle">Sebaran Usaha Mikro Kecil dan Menengah Desa Kemiri</p>
+    </div>
+  </section>
+
+  <!-- Main Content -->
+  <section class="main-content">
+    <div class="container">
+      <div class="mb-3">
+        <a href="index.html" class="btn btn-custom" style="margin-bottom: 10px;">
+          <i class="fas fa-arrow-left"></i> Kembali ke Homepage
+        </a>
+      </div>
+
+      <!-- Desktop Section Title -->
+      <h3 class="section-title">Peta Sebaran UMKM Desa Kemiri</h3>
+
+      <!-- Peta Section -->
+      <div class="peta-container fade-in-up">
+        <div id="map" style="width: 100%; height: 500px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+        </div>
+        <div class="mt-3">
+          <h5 class="text-center mb-3" style="color: var(--primary-orange); font-weight: bold;">
+            <i class="fas fa-store me-2"></i>PETA TEMATIK UMKM DESA KEMIRI
+          </h5>
+          <div class="row">
+            <div class="col-md-6">
+              <h6 style="color: var(--secondary-orange); font-weight: bold;">Legenda:</h6>
+              <ul class="list-unstyled">
+                <li><span
+                    style="display:inline-block;width:18px;height:18px;background:#ff9800;border-radius:50%;margin-right:8px;"></span>UMKM
+                </li>
+                <li><span
+                    style="display:inline-block;width:30px;height:6px;background:#e65100;border-radius:0;margin-right:8px;"></span>Batas
+                  Desa Kemiri</li>
+                <li><span
+                    style="display:inline-block;width:30px;height:4px;background:#5d4037;border-radius:0;margin-right:8px;"></span>Batas
+                  RT/RW</li>
+              </ul>
+            </div>
+            <div class="col-md-6">
+              <h6 style="color: var(--secondary-orange); font-weight: bold;">Informasi Lokasi:</h6>
+              <ul class="list-unstyled">
+                <li><i class="fas fa-map-pin me-2"></i>Kecamatan Tulung</li>
+                <li><i class="fas fa-map-marker-alt me-2"></i>Kabupaten Klaten</li>
+                <li><i class="fas fa-compass me-2"></i>Jawa Tengah</li>
+                <li><i class="fas fa-globe me-2"></i>Indonesia</li>
+              </ul>
+            </div>
+          </div>
+          <div class="row mt-3">
+            <div class="col-12">
+              <div class="alert alert-warning" role="alert">
+                <i class="fas fa-info-circle me-2"></i>
+                <strong>Total UMKM:</strong> 37 usaha tersebar di seluruh wilayah Desa Kemiri
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="row">
+        <div class="col-12 col-md-6 text-center text-md-start">
+          <h5><i class="fas fa-home me-2"></i>DESA KEMIRI</h5>
+          <p class="mb-2">Kecamatan Tulung, Kabupaten Klaten</p>
+          <p class="mb-0">Jawa Tengah, Indonesia</p>
+        </div>
+        <div class="col-12 col-md-6 text-center text-md-end">
+          <h6><i class="fas fa-graduation-cap me-2"></i>KKN BELA NEGARA 83</h6>
+          <p class="mb-0">UPN Veteran Yogyakarta</p>
+        </div>
+      </div>
+      <div class="footer-content">
+        <p class="mb-0">© 2025 Desa Kemiri - Peta Tematik UMKM</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.awesome-markers/2.0.5/leaflet.awesome-markers.js"></script>
+  <script src="https://unpkg.com/leaflet.fullscreen@1.6.0/Control.FullScreen.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.fullscreen@1.6.0/Control.FullScreen.css" />
+
+  <script>
+    // Add fade-in animation on scroll
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('fade-in-up');
+        }
+      });
+    }, observerOptions);
+
+    // Observe all cards
+    document.querySelectorAll('.peta-container').forEach(element => {
+      observer.observe(element);
+    });
+
+    // Add hover effects
+    document.querySelectorAll('.peta-container').forEach(element => {
+      element.addEventListener('mouseenter', function () {
+        this.style.transform = 'translateY(-5px)';
+      });
+
+      element.addEventListener('mouseleave', function () {
+        this.style.transform = 'translateY(0)';
+      });
+    });
+
+    // Inisialisasi Leaflet Map
+    document.addEventListener('DOMContentLoaded', function () {
+      var map = L.map('map', {
+        fullscreenControl: true
+      }).setView([-7.597, 110.585], 15);
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+      }).addTo(map);
+
+      // Data marker UMKM saja
+      const umkmData = [
+        { pos: [-7.60186724647734, 110.57876901118863], label: "Rambak Balap" },
+        { pos: [-7.601927247500965, 110.57935741840298], label: "Seblak Balap" },
+        { pos: [-7.602558124641127, 110.57905751684252], label: "Laundry Yoshua" },
+        { pos: [-7.604116752809611, 110.57924994597468], label: "Gado Gado Anugrah" },
+        { pos: [-7.601850832840964, 110.58348482142974], label: "Soto Ayam Brengos" },
+        { pos: [-7.590845753410016, 110.59182095809474], label: "Soto Ponorogo" },
+        { pos: [-7.5911155022650965, 110.5902012080921], label: "Warung Seblak Mbak Ella" },
+        { pos: [-7.592153043626409, 110.5901561679443], label: "Warung Mbak Ning" },
+        { pos: [-7.591724332150449, 110.5906904054498], label: "Bengkel Motor Suroto" },
+        { pos: [-7.595725414063389, 110.58110505688451], label: "Ayam kremesLidya" },
+        { pos: [-7.595725414063389, 110.58110505688451], label: "Toko Hewan Naufal" },
+        { pos: [-7.591755098348849, 110.59095195019064], label: "Toko Sembako Warsini" },
+        { pos: [-7.590964543245336, 110.59228364200382], label: "Sate ayam Cak Rizki" },
+        { pos: [-7.591166939228501, 110.59277501509347], label: "Warung Bakso Mbak Intan" },
+        { pos: [-7.590938097331123, 110.59224772479423], label: "Angkringan 37" },
+        { pos: [-7.590885587938165, 110.59215183582106], label: "Mi Ayam & Bakso Didik" },
+        { pos: [-7.590962229542945, 110.59234579563608], label: "Potong Rambut Cak Adi" },
+        { pos: [-7.5911759217071655, 110.5925237989104], label: "Bengkel JRT Jaya Motor" },
+        { pos: [-7.591038436587191, 110.5862462835798], label: "Bengkel Las Bambang" },
+        { pos: [-7.590365125434021, 110.584935734173], label: "Toko Jiyem" },
+        { pos: [-7.58941030176232, 110.5837264392122], label: "Toko Bu Ayu" },
+        { pos: [-7.601101625973249, 110.59563009805228], label: "Toko Bangunan Raka Mulya" },
+        { pos: [-7.590749343135257, 110.59095827915687], label: "Pancingan Langgeng Jaya" },
+        { pos: [-7.589919465301484, 110.58466483840255], label: "Toko Beras Sido Makmur" },
+        { pos: [-7.593168526364059, 110.58276673675277], label: "Toko Barokah" },
+        { pos: [-7.6006676410168295, 110.5826387975494], label: "Bengkel Motor Tris" },
+        { pos: [-7.603552258125215, 110.57931358147879], label: "Angkringan 57 K-Rep" },
+        { pos: [-7.6031904661569705, 110.5795116724941], label: "Toko Aksesoris HP" },
+        { pos: [-7.592252732423281, 110.59353292358406], label: "Toko Pakan Hewan" },
+        { pos: [-7.601287185403271, 110.58429236327375], label: "Toko Sembako Pariah" },
+        { pos: [-7.601774911380886, 110.58326538405484], label: "Toko Joos" },
+        { pos: [-7.596682263461115, 110.58628477757144], label: "Cuci Motor" },
+        { pos: [-7.596540695917991, 110.58625286134699], label: "Warung Soto Yanti" },
+        { pos: [-7.5962946154387945, 110.58639023642594], label: "Kios Dwi Tani" },
+        { pos: [-7.596132190797502, 110.58652678203511], label: "Toko Salsabila" },
+        { pos: [-7.600792804252449, 110.58236822168594], label: "Tambal Ban" },
+        { pos: [-7.595835144951265, 110.58663220030823], label: "Angkringan Mriki Den" }
+      ];
+
+      // Fungsi marker custom
+      function getCustomIcon(color) {
+        const svgIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="35" viewBox="0 0 25 41">
+          <path d="M12.5 0C5.6 0 0 5.6 0 12.5c0 9.4 12.5 28.5 12.5 28.5S25 21.9 25 12.5C25 5.6 19.4 0 12.5 0z" fill="${color}"/>
+          <circle cx="12.5" cy="12.5" r="5" fill="white"/>
+        </svg>`;
+        return L.divIcon({
+          className: "",
+          html: svgIcon,
+          iconSize: [25, 41],
+          iconAnchor: [12, 41],
+          popupAnchor: [1, -34]
+        });
+      }
+
+      // Fungsi untuk membuka rute Google Maps
+      window.getDirections = function (lat, lng) {
+        const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+        window.open(url, '_blank');
+      };
+
+      // Tambahkan marker UMKM ke peta
+      umkmData.forEach(item => {
+        const marker = L.marker(item.pos, { icon: getCustomIcon("#ff9800") }).addTo(map);
+
+        // Konten popup dengan tombol rute
+        const popupContent = `
+          <b style="color:#ff9800">${item.label}</b><br>
+          <small style="color:#666">Usaha Mikro Kecil Menengah</small><br>
+          <button onclick="getDirections(${item.pos[0]}, ${item.pos[1]})"
+            style="margin-top:8px;padding:6px 16px;background:#ff9800;color:#fff;border:none;border-radius:5px;cursor:pointer;">
+            <i class="fas fa-route"></i> Rute
+          </button>
+        `;
+
+        marker.bindPopup(popupContent);
+      });
+
+      // GeoJSON batas desa Kemiri
+      var batasDesaKemiri = {
+        "type": "FeatureCollection",
+        "name": "batas desa kemiri",
+        "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+        "features": [
+          {
+            "type": "Feature",
+            "properties": { "Id": 0 },
+            "geometry": {
+              "type": "MultiLineString",
+              "coordinates": [
+                [
+                  [110.57989895697506, -7.601783258437933],
+                  [110.58244854944286, -7.597804204770966],
+                  [110.58144322716782, -7.597102263774218],
+                  [110.58121717837236, -7.597450259946299],
+                  [110.58038139269399, -7.596840523063634],
+                  [110.5799858073018, -7.59739374774739],
+                  [110.57944447992298, -7.596908932567544],
+                  [110.57862951452842, -7.596379502493733],
+                  [110.57704419863336, -7.595392026176285],
+                  [110.57823392913628, -7.594005990140431],
+                  [110.57959319623586, -7.594901262343797],
+                  [110.57978057878995, -7.59489233936506],
+                  [110.57989360318777, -7.594788237946034],
+                  [110.58002744786944, -7.594716854115916],
+                  [110.58020888177111, -7.594672239222007],
+                  [110.58095246333522, -7.593765069713584],
+                  [110.58034570077876, -7.592691337934639],
+                  [110.58079482404378, -7.592384982330202],
+                  [110.5813034338338, -7.592310624173763],
+                  [110.58301367143173, -7.592557493253082],
+                  [110.58316536207082, -7.59205483211565],
+                  [110.58422422221844, -7.592328470131292],
+                  [110.5845484237804, -7.591471864169193],
+                  [110.58365017725078, -7.590802640761297],
+                  [110.58219870603716, -7.59038326075904],
+                  [110.58274895639482, -7.5889674814606],
+                  [110.58342412845513, -7.587849134787859],
+                  [110.58384053413107, -7.587028220740763],
+                  [110.584149864062, -7.587194783011171],
+                  [110.5845335521492, -7.586977657194439],
+                  [110.58500647002398, -7.587165039748641],
+                  [110.58446811697155, -7.588244720180001],
+                  [110.58610102208667, -7.588916917914219],
+                  [110.58729075258958, -7.586254895913953],
+                  [110.58749598110148, -7.586269767545161],
+                  [110.58803433415392, -7.586495816340744],
+                  [110.58811464096294, -7.58637089463798],
+                  [110.58816223018295, -7.586439304141834],
+                  [110.58967021359541, -7.587111501875995],
+                  [110.58976241770944, -7.587156116769847],
+                  [110.58980108395087, -7.587218577621286],
+                  [110.59056846012521, -7.587661752233657],
+                  [110.591429230144, -7.588554050110758],
+                  [110.59218946793533, -7.58840771325896],
+                  [110.5931460112597, -7.588532634961723],
+                  [110.59312578584121, -7.589071582879569],
+                  [110.5932495178136, -7.589561751846759],
+                  [110.59385865983097, -7.590627750377337],
+                  [110.59439641801828, -7.591427249275398],
+                  [110.59335421409776, -7.593487862506436],
+                  [110.59625239760288, -7.594920298031923],
+                  [110.59598351850912, -7.598610048898365],
+                  [110.59711852140896, -7.598838477154857],
+                  [110.59751351193597, -7.599119253553624],
+                  [110.59749923516989, -7.599119253553624],
+                  [110.59774194019258, -7.599390512108243],
+                  [110.59825114484772, -7.599442860250349],
+                  [110.59852240340234, -7.599966341671688],
+                  [110.5979798862931, -7.600085314721923],
+                  [110.59713755709703, -7.600718251349576],
+                  [110.59648558478142, -7.601517750247524],
+                  [110.59768007420627, -7.602374356209566],
+                  [110.59751827085796, -7.602783623502603],
+                  [110.59295446464876, -7.599899716763503],
+                  [110.59306391985507, -7.599162083851752],
+                  [110.59129835978877, -7.598100844243049],
+                  [110.591817082288, -7.596834970988027],
+                  [110.59131263655468, -7.596430462617036],
+                  [110.59129360086661, -7.595916499039674],
+                  [110.59110514755497, -7.595880331232422],
+                  [110.59090051390842, -7.595792291175201],
+                  [110.59073633109904, -7.595775634948154],
+                  [110.59058404559482, -7.595697112734968],
+                  [110.59034847895521, -7.595923161530493],
+                  [110.58997014465513, -7.59582798309026],
+                  [110.58951566760305, -7.596013581048737],
+                  [110.58885417744352, -7.596015960509817],
+                  [110.58856864212282, -7.595946956140608],
+                  [110.58837114685929, -7.595808947402304],
+                  [110.58815699536876, -7.595801809019235],
+                  [110.58783814759391, -7.595568621840698],
+                  [110.58779293783482, -7.595359229272162],
+                  [110.58749550520906, -7.595168872391696],
+                  [110.58724566180354, -7.595363988194151],
+                  [110.58694109079477, -7.595906505303503],
+                  [110.58651992619667, -7.597020093054255],
+                  [110.58609400267653, -7.598007569371646],
+                  [110.58399769753055, -7.602978263412922],
+                  [110.58351585667674, -7.603881268864654],
+                  [110.58319462944098, -7.604534430910803],
+                  [110.58273777292783, -7.604273879930645],
+                  [110.58243796084122, -7.604209634483539],
+                  [110.58218097905251, -7.604227480441068],
+                  [110.58174196849694, -7.604727167252292],
+                  [110.58116375947247, -7.604752151592834],
+                  [110.58064622670366, -7.604737874826753],
+                  [110.58040709087248, -7.604909196019264],
+                  [110.57936845614353, -7.604977010657876],
+                  [110.57955762329357, -7.604498738995687],
+                  [110.57963257631513, -7.603763485544846],
+                  [110.57921498090872, -7.603545764862872],
+                  [110.57838692847849, -7.603742070395811],
+                  [110.57817634617953, -7.603709947672257],
+                  [110.5770163589392, -7.602396485197005],
+                  [110.57755530685716, -7.601696923661279],
+                  [110.57854397290504, -7.601008069700129],
+                  [110.57989877851514, -7.601783333787751]
+                ]
+              ]
+            }
+          }
+        ]
+      };
+
+      // Tambahkan batas desa ke peta
+      L.geoJSON(batasDesaKemiri, {
+        style: {
+          color: "#e65100",
+          weight: 4,
+          opacity: 0.8
+        }
+      }).addTo(map);
+
+      // Data batas RT/RW
+      const batasRTRW = {
+        "type": "FeatureCollection",
+        "name": "batas rt rw kemiri",
+        "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+        "features": [
+          { "type": "Feature", "properties": { "Id": 0 }, "geometry": { "type": "MultiLineString", "coordinates": [[[110.583487568867838, -7.590145779143882], [110.585224575402208, -7.590871514750575], [110.585914619093899, -7.589027432471084]]] } },
+          { "type": "Feature", "properties": { "Id": 0 }, "geometry": { "type": "MultiLineString", "coordinates": [[[110.585914619093899, -7.589027432471084], [110.587711112153272, -7.589765065382892], [110.586902095411347, -7.591216536596505], [110.587687317543271, -7.591680531492614], [110.587163836122045, -7.592763186250295], [110.587377987612513, -7.592763186250295], [110.587592139103037, -7.592691802420063], [110.587830085203507, -7.59275128894518], [110.588127517829264, -7.593001132350878], [110.588341669319732, -7.592953543130761], [110.588484436980195, -7.593096310791054], [110.588793766910953, -7.593381846111754], [110.589019815706422, -7.593512716467103], [110.589174480671886, -7.593369948806753], [110.589352940247352, -7.59313200270617], [110.589626578262937, -7.592858364690528], [110.589745551313342, -7.592763186250295], [110.5900548812441, -7.592941645825704], [110.590506978835094, -7.593215283841403], [110.592243985369407, -7.594071889803445], [110.592934029061155, -7.592763186250295], [110.593588380837787, -7.59298923504582]]] } },
+          { "type": "Feature", "properties": { "Id": 0 }, "geometry": { "type": "MultiLineString", "coordinates": [[[110.585224575402208, -7.590871514750575], [110.584849413716995, -7.591587732513347], [110.587163836122045, -7.592763186250295]]] } },
+          { "type": "Feature", "properties": { "Id": 0 }, "geometry": { "type": "MultiLineString", "coordinates": [[[110.584011843442909, -7.592339642191178], [110.585192056101675, -7.593091551869065], [110.585722388068859, -7.592031100569955]]] } },
+          { "type": "Feature", "properties": { "Id": 0 }, "geometry": { "type": "MultiLineString", "coordinates": [[[110.585586158658316, -7.592303504770484], [110.585582287706757, -7.593082034024974], [110.585591805550735, -7.593348533657718], [110.585782162431201, -7.593681658198477], [110.585972519311667, -7.594043336271397], [110.586267572476515, -7.594328871592097], [110.586657804081426, -7.594633442600866], [110.58701948215429, -7.594880906545427], [110.587181285502652, -7.595223548930278]]] } },
+          { "type": "Feature", "properties": { "Id": 0 }, "geometry": { "type": "MultiLineString", "coordinates": [[[110.580712797810691, -7.594057461653563], [110.581283791399585, -7.594230123960358], [110.581697817614724, -7.594387168386731], [110.582097567063727, -7.594372891620708], [110.582425932682497, -7.594058802767904], [110.582582977108871, -7.594015972469776], [110.583054110388105, -7.594330061322637], [110.583382476006875, -7.594686980473512], [110.583725118391726, -7.594915408730003], [110.583996376946345, -7.595172390518655]]] } },
+          { "type": "Feature", "properties": { "Id": 0 }, "geometry": { "type": "MultiLineString", "coordinates": [[[110.585192056101675, -7.593091551869065], [110.582289072135609, -7.597692853751596]]] } },
+          { "type": "Feature", "properties": { "Id": 0 }, "geometry": { "type": "MultiLineString", "coordinates": [[[110.579780578789951, -7.594892339365003], [110.579484918879359, -7.595457925839355], [110.580641336928124, -7.596371638865605], [110.581141023739349, -7.595700630861927], [110.582751230936935, -7.596960320541939]]] } },
+          { "type": "Feature", "properties": { "Id": 0 }, "geometry": { "type": "MultiLineString", "coordinates": [[[110.580381392693994, -7.596840523063634], [110.580641336928124, -7.596371638865605]]] } },
+          { "type": "Feature", "properties": { "Id": 0 }, "geometry": { "type": "MultiLineString", "coordinates": [[[110.579898956975057, -7.601783258437933], [110.581012532844966, -7.602210836173924], [110.581897692339282, -7.602696246219068], [110.582268888256124, -7.602539201792695], [110.583686778931394, -7.603560947898472]]] } },
+          { "type": "Feature", "properties": { "Id": 0 }, "geometry": { "type": "MultiLineString", "coordinates": [[[110.579652107961806, -7.601642180828208], [110.579375463672989, -7.602158488031819], [110.579261249544743, -7.602615344544915], [110.579660998993745, -7.602715281907194], [110.579760936355967, -7.602929433397719], [110.579646722227665, -7.603357736378769], [110.579746659589887, -7.603643271699411], [110.580103578740818, -7.60374320906169], [110.580346283763447, -7.603843146423912], [110.580517604955901, -7.604057297914494], [110.580457897305507, -7.604872797380665]]] } },
+          { "type": "Feature", "properties": { "Id": 0 }, "geometry": { "type": "MultiLineString", "coordinates": [[[110.593181000487903, -7.589290317825714], [110.592581472255347, -7.589297501295277], [110.59159161647699, -7.589259429919196], [110.591439330972605, -7.589906643312702], [110.591096688587754, -7.58986857193662], [110.590754046202903, -7.590858427715034], [110.591248974092139, -7.590972641843337], [110.591458366660675, -7.590763249274801], [110.591820044733595, -7.590649035146612], [110.592257865558679, -7.590706142210763], [110.592448222438975, -7.590839392027078], [110.592771829135813, -7.591124927347721], [110.593095435832652, -7.591258177164036], [110.593689329547658, -7.590331422381439]]] } },
+          { "type": "Feature", "properties": { "Id": 0 }, "geometry": { "type": "MultiLineString", "coordinates": [[[110.590754046202903, -7.590858427715034], [110.59001165436905, -7.590496749642227], [110.589630940608231, -7.590382535513925], [110.589326369599462, -7.590382535513925], [110.589097941342914, -7.59106782028357], [110.589040834278762, -7.591505641108654], [110.589402512351683, -7.591810212117423], [110.589992618681151, -7.592152854502217], [110.590316225377819, -7.592209961566368], [110.590754046202903, -7.591905390557599], [110.590963438771439, -7.591600819548887], [110.591229938404126, -7.591353355604269], [110.591248974092139, -7.590972641843337]]] } },
+          { "type": "Feature", "properties": { "Id": 0 }, "geometry": { "type": "MultiLineString", "coordinates": [[[110.590754046202903, -7.591905390557599], [110.591344152532372, -7.592228997254495], [110.591762937669444, -7.592457425510986], [110.592200758494357, -7.592495496887068], [110.592633320432981, -7.591002713786395]]] } },
+          { "type": "Feature", "properties": { "Id": 0 }, "geometry": { "type": "MultiLineString", "coordinates": [[[110.592200758494357, -7.592495496887068], [110.592934029061155, -7.592763186250295]]] } },
+          { "type": "Feature", "properties": { "Id": 0 }, "geometry": { "type": "MultiLineString", "coordinates": [[[110.582451958904187, -7.589731647977089], [110.583487568867838, -7.590145779143882], [110.583745343810222, -7.588882285349712], [110.583935700690688, -7.588882285349712], [110.58446811697155, -7.588244720180001]]] } },
+          { "type": "Feature", "properties": { "Id": 0 }, "geometry": { "type": "MultiLineString", "coordinates": [[[110.581388451963051, -7.599458659283812], [110.582797525176318, -7.600514677053638], [110.583006917744854, -7.600210106044869], [110.58473956647515, -7.601219166675946]]] } },
+          { "type": "Feature", "properties": { "Id": 0 }, "geometry": { "type": "MultiLineString", "coordinates": [[[110.580945737877016, -7.600149586610428], [110.582464400635388, -7.60129514026346], [110.584297152002591, -7.602268206214205]]] } }
+        ]
+      };
+
+      // Tambahkan batas RT/RW ke peta
+      L.geoJSON(batasRTRW, {
+        style: {
+          color: "#5d4037",
+          weight: 2,
+          opacity: 0.7,
+          dashArray: "5, 5"
+        }
+      }).addTo(map);
+
+      // Fitur Reset View
+      var defaultView = { center: [-7.597, 110.585], zoom: 15 };
+      L.Control.ResetView = L.Control.extend({
+        onAdd: function(map) {
+          var btn = L.DomUtil.create('button', 'leaflet-control-custom');
+          btn.innerHTML = '<i class="fas fa-sync-alt"></i> Reset View';
+          btn.title = 'Kembalikan ke tampilan awal';
+          btn.onclick = function() {
+            map.setView(defaultView.center, defaultView.zoom);
+          };
+          return btn;
+        },
+        onRemove: function(map) {}
+      });
+      L.control.resetView = function(opts) {
+        return new L.Control.ResetView(opts);
+      }
+      L.control.resetView({ position: 'topright' }).addTo(map);
+
+      // Fullscreen sudah otomatis aktif dengan leaflet.fullscreen
+      // Tombol fullscreen ada di kanan atas peta
+    });
+  </script>
+</body>
+
+</html>
