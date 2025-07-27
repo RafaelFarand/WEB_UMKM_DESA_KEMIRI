@@ -63,18 +63,28 @@
       position: relative;
       padding-bottom: 10px;
       text-align: center;
+      display: inline-block;
+      width: 100%;
+      max-width: 700px;
     }
 
     .section-title::after {
       content: '';
-      position: absolute;
-      bottom: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 50px;
+      display: block;
+      margin: 0 auto;
+      margin-top: 8px;
+      width: 60%;
+      max-width: 300px;
       height: 3px;
       background: var(--gold);
       border-radius: 2px;
+    }
+
+    @media (max-width: 768px) {
+      .section-title::after {
+        width: 80%;
+        max-width: 180px;
+      }
     }
 
     .info-card {
@@ -141,35 +151,21 @@
   <!-- Page Header -->
   <section class="page-header">
     <div class="container">
-      <h1 class="page-title">Selamat Datang di UMKM Desa Kemiri</h1>
-      <p class="page-subtitle">Mendukung Usaha Mikro Kecil dan Menengah di Wilayah Kami</p>
+      <h1 class="page-title">Selamat Datang</h1>
+      <p class="page-subtitle">Website Peta UMKM Desa Kemiri</p>
     </div>
   </section>
 
   <!-- Main Content -->
   <section class="main-content">
-    <div class="container">
+    <div class="container text-center">
+      <h3 class="section-title mx-auto">Tentang Website Peta UMKM Desa Kemiri</h3>
 
-      <!-- Desktop Section Title -->
-      <h3 class="section-title">Tentang UMKM Desa Kemiri</h3>
-
-      <div class="row">
-        <div class="col-md-4">
+      <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
           <div class="info-card">
-            <h5 class="text-center" style="color: var(--primary-orange);">Visi</h5>
-            <p class="text-center">Mewujudkan desa yang mandiri dan berdaya saing melalui pengembangan UMKM.</p>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="info-card">
-            <h5 class="text-center" style="color: var(--primary-orange);">Misi</h5>
-            <p class="text-center">Memberdayakan masyarakat melalui pelatihan dan akses pasar untuk produk lokal.</p>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="info-card">
-            <h5 class="text-center" style="color: var(--primary-orange);">Tujuan</h5>
-            <p class="text-center">Meningkatkan kesejahteraan masyarakat melalui pengembangan usaha mikro kecil dan menengah.</p>
+            <h5 class="text-center" style="color: var(--primary-orange);">Deskripsi Singkat</h5>
+            <p class="text-center">Pemetaan lokasi UMKM di Desa Kemiri untuk mendata UMKM dan juga meng-ekspos lokasi UMKM di desa Kemiri dalam bentuk Peta tematik.</p>
           </div>
         </div>
       </div>
